@@ -29,5 +29,21 @@ print(f"fotos para aprender={len(ent)}  fotos de examen={len(exa)}  números por
 # --- PASO 2: crear la red y darle una sola vuelta ------------------------------
 # (pega aquí el bloque del paso 2)
 
+red = MLPClassifier(hidden_layer_sizes=(NEURONAS,), random_state=0)
+red.partial_fit(X[ent], y[ent], classes=[0, 1])                   # una sola pasada por las fotos
+
+def acierto(filas):
+    return (red.predict(X[filas]) == y[filas]).mean()
+
+pesos = sum(c.size for c in red.coefs_) + sum(b.size for b in red.intercepts_)
+print(f"pesos de la red: {pesos}")
+print(f"tras 1 vuelta: pérdida={red.loss_:.3f}  acierto entrenamiento={acierto(ent):.2f}  examen={acierto(exa):.2f}")
+
 # --- PASO 3: entrenar vuelta a vuelta ------------------------------------------
 # (pega aquí el bloque del paso 3)
+
+print("vuelta  pérdida  acierto_entrenamiento  acierto_examen")
+for vuelta in range(2, VUELTAS + 1):
+    red.partial_fit(X[ent], y[ent])                                # una pasada más
+    if vuelta % (VUELTAS // 10) == 0:                              # diez filas, sean cuantas sean las vueltas
+        print(f"{vuelta:6d}  {red.loss_:7.3f}  {acierto(ent):21.2f}  {acierto(exa):14.2f}")
