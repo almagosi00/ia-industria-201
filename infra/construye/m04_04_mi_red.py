@@ -17,6 +17,9 @@ PARTE = 1.0            # qué parte de las fotos de entrenamiento se usa (1.0 = 
 
 # --- PASO 1: las fotos en números y el corte de siempre (ya está hecho) ------
 fotos = pd.read_csv("/data/imagenes/manifiesto.csv")
+
+
+
 X = np.stack([np.asarray(Image.open(r).convert("L").resize((16, 16)), dtype=np.float32).reshape(-1) / 255.0
               for r in fotos["ruta"]])
 y = fotos["defecto"].to_numpy()
@@ -25,6 +28,8 @@ k = max(1, round(28 * PARTE))                                         # fotos de
 ent = np.concatenate([buenas[:k], malas[:k]])
 exa = np.concatenate([buenas[28:], malas[28:]])                       # el examen del M04-01
 print(f"fotos para aprender={len(ent)}  fotos de examen={len(exa)}  números por foto={X.shape[1]}")
+
+desplazadas = np.stack([np.roll(f.reshape(16, 16), 2, axis=1).reshape(-1) for f in X])
 
 # --- PASO 2: crear la red y darle una sola vuelta ------------------------------
 # (pega aquí el bloque del paso 2)
@@ -47,3 +52,11 @@ for vuelta in range(2, VUELTAS + 1):
     red.partial_fit(X[ent], y[ent])                                # una pasada más
     if vuelta % (VUELTAS // 10) == 0:                              # diez filas, sean cuantas sean las vueltas
         print(f"{vuelta:6d}  {red.loss_:7.3f}  {acierto(ent):21.2f}  {acierto(exa):14.2f}")
+
+# Reto 1: las mismas fotos de examen, con otras condiciones
+def acierto_con(X_cambiadas):
+    return (red.predict(X_cambiadas[exa]) == y[exa]).mean()
+
+print(f"examen normal:            {acierto_con(X):.2f}")
+print(f"con +0,15 de luz:         {acierto_con(np.clip(X + 0.15, 0, 1)):.2f}")
+print(f"carcasa movida 2 puntos:  {acierto_con(desplazadas):.2f}")

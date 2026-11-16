@@ -21,8 +21,26 @@ print("salud:", httpx.get(f"{LLM}/salud", timeout=10).json())
 # --- PASO 2: hacer una pregunta ------------------------------------------------
 # (pega aquí el bloque del paso 2)
 
+def preguntar(texto, max_tokens=80):
+    peticion = {"messages": [{"role": "user", "content": texto}], "max_tokens": max_tokens}
+    inicio = time.time()
+    respuesta = httpx.post(f"{LLM}/v1/chat/completions", json=peticion, timeout=180).json()
+    return respuesta, time.time() - inicio
+
+respuesta, segundos = preguntar(PREGUNTA)
+print(f"respuesta ({segundos:.1f} s): {respuesta['choices'][0]['message']['content']}")
+
 # --- PASO 3: contar los tokens -------------------------------------------------
 # (pega aquí el bloque del paso 3)
 
+uso = respuesta["usage"]
+print(f"tokens: pregunta={uso['prompt_tokens']} respuesta={uso['completion_tokens']}  "
+      f"velocidad={uso['completion_tokens'] / segundos:.0f} tokens/s")
+
 # --- PASO 4: cómo crece el tiempo con la longitud ------------------------------
 # (pega aquí el bloque del paso 4)
+
+print("max_tokens  escritos  segundos")
+for maximo in LONGITUDES:
+    r, s = preguntar("Escribe un párrafo largo sobre el mantenimiento de un husillo.", maximo)
+    print(f"{maximo:10d}  {r['usage']['completion_tokens']:8d}  {s:8.1f}")
