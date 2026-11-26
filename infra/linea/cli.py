@@ -909,7 +909,7 @@ HERRAMIENTAS = {
 PLAN = {
     "ArchivadorCaido": ["estado_servicios", "ultimo_registro"],
     "HistoricoSinDatos": ["estado_servicios", "retraso_historico", "perdida_ultimo_minuto", "ultimo_registro"],
-    "RegistrosPerdidos": ["estado_servicios", "retraso_historico", "perdida_ultimo_minuto"],
+    "RegistrosPerdidos": ["estado_servicios", "retraso_historico", "perdida_ultimo_minuto", "ultimo_registro"],
     "EstacionCaida": ["estado_servicios"],
     "TemperaturaHusilloAlta": ["temperatura_actual"],
 }
